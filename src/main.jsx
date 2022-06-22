@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import SocketProvider from './context/SocketProvider';
+import SocketProvider from './providers/SocketProvider';
 import App from './App';
 import './index.css';
 
