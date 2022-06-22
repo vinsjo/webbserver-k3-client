@@ -6,13 +6,14 @@ import { replaceAtIndex } from '../utils';
 const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 	const [socket, setSocket] = useState(null);
 	const [error, setError] = useState(null);
+	const [user, setUser] = useState(null);
 	const [messages, setMessages] = useState([]);
 	const [users, setUsers] = useState([]);
 
-	const value = useMemo(
-		() => ({ socket, error, messages, users }),
-		[socket, error, messages, users]
-	);
+	const sendMessage = (content) => {
+		if (!socket) return;
+		socket.emit('message', { content, user });
+	};
 
 	useEffect(() => {
 		const socket = io(url);
@@ -36,6 +37,9 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				console.error(err);
 				setError(err);
 			},
+			init: (data) => {
+				if (data.user) setUser(data.user);
+			},
 			message: (msg) => {
 				if (!msg || !msg.id) return;
 				console.log('Recieved message: ', msg);
@@ -56,7 +60,9 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 	}, [socket, error, messages, users]);
 
 	return (
-		<SocketContext.Provider value={value}>
+		<SocketContext.Provider
+			value={{ socket, error, messages, sendMessage, users, user }}
+		>
 			{children}
 		</SocketContext.Provider>
 	);
