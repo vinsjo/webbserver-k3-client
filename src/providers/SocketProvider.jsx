@@ -10,6 +10,12 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 	const [messages, setMessages] = useState([]);
 	const [users, setUsers] = useState([]);
 
+	const reset = () => {
+		setMessages([]);
+		setUsers([]);
+		setError(null);
+	};
+
 	const sendMessage = (content) => {
 		if (!socket) return;
 		socket.emit('message', { content, user });
@@ -17,30 +23,30 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 
 	useEffect(() => {
 		const socket = io(url);
+		socket.io.reconnectionDelay = 10000;
 		setSocket(socket);
 		return () => socket.disconnect();
 	}, []);
 
 	useEffect(() => {
 		if (!socket) return;
-		const listeners = {
-			connect: () => {
+		socket
+			.on('connect', () => {
 				console.log('Socket connected to server', `ID: ${socket.id}`);
-				if (error) setError(null);
+				reset();
 				setSocket(socket);
-			},
-			disconnect: () => {
+			})
+			.on('disconnect', () => {
 				console.log('Socket disconnected from server');
+				reset();
 				setSocket(socket);
-			},
-			connect_error: (err) => {
-				console.error(err);
+			})
+			.on('connect_error', (err) => {
+				err.message !== 'xhr poll error' && console.error(err);
+				setSocket(socket);
 				setError(err);
-			},
-			init: (data) => {
-				if (data.user) setUser(data.user);
-			},
-			message: (msg) => {
+			})
+			.on('message', (msg) => {
 				if (!msg || !msg.id) return;
 				console.log('Recieved message: ', msg);
 				const index = messages.findIndex(({ id }) => msg.id === id);
@@ -49,14 +55,8 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 						? [...messages, msg]
 						: replaceAtIndex(messages, index, msg)
 				);
-			},
-		};
-		Object.keys(listeners).forEach((ev) => socket.on(ev, listeners[ev]));
-		return () => {
-			Object.keys(listeners).forEach((ev) =>
-				socket.off(ev, listeners[ev])
-			);
-		};
+			});
+		return () => socket.off();
 	}, [socket, error, messages, users]);
 
 	return (
