@@ -1,11 +1,5 @@
 import React from 'react';
 
-const SocketContext = React.createContext({
-	socket: null,
-	user: null,
-	messages: [],
-	users: [],
-	sendMessage: null,
-});
+const SocketContext = React.createContext({});
 
 export default SocketContext;

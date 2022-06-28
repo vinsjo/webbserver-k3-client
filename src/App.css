@@ -90,3 +90,8 @@
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 }
+
+.msg-form input:disabled,
+.msg-form button:disabled {
+	opacity: 0.5;
+}

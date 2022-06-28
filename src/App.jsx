@@ -4,7 +4,7 @@ import SocketContext from './context/SocketContext';
 import './App.css';
 
 const App = () => {
-	const { socket, messages, error, sendMessage, user } =
+	const { socket, messages, error, sendMessage, user, currentRoom } =
 		useContext(SocketContext);
 	const [input, setInput] = useState('');
 	const latestMessageRef = useRef(null);
@@ -29,14 +29,17 @@ const App = () => {
 							: `error: ${error.message}`
 						: !socket || !socket.connected
 						? 'Connecting...'
-						: user
-						? `user: ${user}`
-						: `Socket ID: ${socket.id}`}
+						: user?.name
+						? `user: ${user?.name}`
+						: `Socket ID: ${socket?.id}`}
 				</code>
+				<code>{currentRoom ? `room: ${currentRoom.name}` : null}</code>
 				<ul className="msg-list">
 					{messages.map((msg, i) => (
 						<li
-							className={`msg${msg.user === user ? ' mine' : ''}`}
+							className={`msg${
+								msg.user?.id === user?.id ? ' mine' : ''
+							}`}
 							key={msg.id}
 							ref={
 								i >= messages.length - 1
@@ -45,14 +48,14 @@ const App = () => {
 							}
 						>
 							<div className="head">
-								<h5 className="author">{msg.user}</h5>
+								<h5 className="author">{msg.user?.name}</h5>
 								<code className="timestamp">
 									{dayjs(msg.timestamp).format(
 										'YY-MM-DD HH:mm:ss'
 									)}
 								</code>
 							</div>
-							<p className="content">{msg.content}</p>
+							<p className="content">{msg.text}</p>
 						</li>
 					))}
 				</ul>
@@ -60,9 +63,12 @@ const App = () => {
 					<input
 						type="text"
 						value={input}
+						disabled={!currentRoom || !user}
 						onChange={(ev) => setInput(ev.target.value)}
 					/>
-					<button disabled={!input.length}>send</button>
+					<button disabled={!input.length || !currentRoom || !user}>
+						send
+					</button>
 				</form>
 			</div>
 		</div>
