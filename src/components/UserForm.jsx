@@ -3,7 +3,7 @@ import SocketContext from '../context/SocketContext';
 import styles from './UserForm.module.css';
 
 const UserForm = () => {
-	const { setUsername, user } = useContext(SocketContext);
+	const { setUsername, user, socket } = useContext(SocketContext);
 	const [input, setInput] = useState(user?.name || '');
 	const handleSubmit = (ev) => {
 		ev.preventDefault();
@@ -11,7 +11,7 @@ const UserForm = () => {
 		setUsername(input);
 		setInput('');
 	};
-	return (
+	return !socket?.connected ? null : (
 		<form className={styles.form} onSubmit={handleSubmit}>
 			<input
 				className={styles.input}

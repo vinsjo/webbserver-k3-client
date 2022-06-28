@@ -17,12 +17,14 @@ const MessageInput = () => {
 				className={styles.input}
 				type="text"
 				value={input}
-				disabled={!currentRoom || !user}
+				disabled={!currentRoom || !user || !socket?.connected}
 				onChange={(ev) => setInput(ev.target.value)}
 			/>
 			<button
 				className={styles.button}
-				disabled={!input.length || !currentRoom || !user}
+				disabled={
+					!input.length || !currentRoom || !user || !socket?.connected
+				}
 			>
 				send
 			</button>
