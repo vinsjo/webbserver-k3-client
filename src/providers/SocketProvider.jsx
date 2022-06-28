@@ -17,8 +17,6 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 		setUsers([]);
 		setRooms([]);
 		setError(null);
-		setUser(null);
-		setCurrentRoom(null);
 	};
 
 	const sendMessage = (text) => {
@@ -57,6 +55,9 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				setSocket(socket);
 				socket.emit('get_rooms');
 				socket.emit('get_users');
+				if (user && user.name) {
+					setUsername(user.name);
+				}
 			})
 			.on('disconnect', () => {
 				console.log('Socket disconnected from server');
@@ -72,7 +73,11 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				console.log('rooms: ', rooms);
 				setRooms(rooms);
 				joinRoom(
-					Array.isArray(rooms) && rooms[0] ? rooms[0].name : 'default'
+					currentRoom && currentRoom.name
+						? currentRoom.name
+						: Array.isArray(rooms) && rooms[0]
+						? rooms[0].name
+						: 'lobby'
 				);
 			})
 			.on('users', (users) => {
