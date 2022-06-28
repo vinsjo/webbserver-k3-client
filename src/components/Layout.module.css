@@ -1,0 +1,32 @@
+/* .page-wrapper {
+	min-height: 100vh;
+	width: 100%;
+	padding: 0 1rem;
+	display: grid;
+	grid-template-rows: 5rem 1fr auto;
+	place-items: center;
+	gap: 2rem;
+	overflow: hidden;
+} */
+
+.page-wrapper {
+	width: 100%;
+	height: 100vh;
+	overflow: hidden;
+	display: grid;
+	justify-items: center;
+	align-items: center;
+	padding: 1rem;
+	grid-template-rows: 1rem 1fr;
+}
+
+.content {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	max-width: 800px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 2rem;
+}

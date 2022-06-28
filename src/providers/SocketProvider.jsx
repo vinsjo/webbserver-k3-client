@@ -57,7 +57,6 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				setSocket(socket);
 				socket.emit('get_rooms');
 				socket.emit('get_users');
-				setUsername('vincent');
 			})
 			.on('disconnect', () => {
 				console.log('Socket disconnected from server');
