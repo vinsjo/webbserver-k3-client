@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import UserForm from '../components/UserForm';
 import SocketContext from '../context/SocketContext';
 const Start = () => {
-	const { user, setUsername } = useContext(SocketContext);
+	const { user, currentRoom, socket } = useContext(SocketContext);
 	const navigate = useNavigate();
 	useEffect(() => {
-		if (!user) return;
+		if (!user || !currentRoom || !socket?.connected) return;
 		navigate('/chat', { replace: true });
-	}, [user]);
+	}, [user, currentRoom, socket]);
 	return <UserForm />;
 };
 

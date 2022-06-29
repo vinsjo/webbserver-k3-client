@@ -17,15 +17,15 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 		setUsers([]);
 		setRooms([]);
 		setError(null);
+		setCurrentRoom(null);
 	};
 
 	const sendMessage = (text) => {
-		if (!socket) return;
-
+		if (!socket || !user || !currentRoom) return;
 		socket.emit('message', {
 			text,
-			user_id: user?.id,
-			room_id: currentRoom?.id,
+			user_id: user.id,
+			room_id: currentRoom.id,
 		});
 	};
 
@@ -72,13 +72,10 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 			.on('rooms', (rooms) => {
 				console.log('rooms: ', rooms);
 				setRooms(rooms);
-				joinRoom(
-					currentRoom && currentRoom.name
-						? currentRoom.name
-						: Array.isArray(rooms) && rooms[0]
-						? rooms[0].name
-						: 'lobby'
-				);
+			})
+			.on('messages', (messages) => {
+				console.log('messages: ', messages);
+				setMessages(messages);
 			})
 			.on('users', (users) => {
 				console.log('users: ', users);
@@ -87,30 +84,30 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 			.on('user', (user) => {
 				console.log('user: ', user);
 				setUser(user);
+				if (currentRoom) return;
+				socket.emit('join_room', { user_id: user.id });
 			})
-			.on('join_room', (data) => {
-				const { room, messages, users } = data;
-				console.log('join_room: ', data);
+			.on('updated_user', (user) => {
+				console.log('updated_user: ', user);
+				setUser(user);
+			})
+			.on('join_room', (room) => {
+				console.log('room: ', room);
 				setCurrentRoom(room);
-				setMessages(messages || []);
-				setUsers(users || []);
+				socket.emit('get_messages', room.id);
+				socket.emit('get_users', room.id);
 			})
 			.on('error', (err) => {
 				console.error(err);
+				setError(err);
 			})
 			.on('message', (msg) => {
 				if (!msg || !msg.id) return;
 				console.log('Recieved message: ', msg);
-				const index = messages.findIndex(({ id }) => msg.id === id);
-				setMessages(
-					index < 0
-						? [...messages, msg]
-						: replaceAtIndex(messages, index, msg)
-				);
+				setMessages([...messages, msg]);
 			});
 		return () => socket.off();
 	}, [socket, error, messages, users]);
-
 	return (
 		<SocketContext.Provider
 			value={{
