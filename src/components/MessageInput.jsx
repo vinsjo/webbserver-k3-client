@@ -4,7 +4,8 @@ import styles from './MessageInput.module.css';
 
 const MessageInput = () => {
 	const [input, setInput] = useState('');
-	const { user, currentRoom, sendMessage } = useContext(SocketContext);
+	const { user, currentRoom, sendMessage, socket } =
+		useContext(SocketContext);
 	const handleSubmit = (ev) => {
 		ev.preventDefault();
 		if (typeof sendMessage !== 'function' || !input.length) return;
