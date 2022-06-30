@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import SocketContext from '../context/SocketContext';
-import { replaceAtIndex } from '../utils';
 
 const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
+	const [username, setUsername] = useState('');
 	const [socket, setSocket] = useState(null);
 	const [error, setError] = useState(null);
 	const [user, setUser] = useState(null);
@@ -20,24 +20,38 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 		setCurrentRoom(null);
 	};
 
-	const sendMessage = (text) => {
-		if (!socket || !user || !currentRoom) return;
-		socket.emit('message', {
-			text,
-			user_id: user.id,
-			room_id: currentRoom.id,
-		});
-	};
+	const sendMessage = useCallback(
+		(text) => {
+			if (!socket || !user || !currentRoom) return;
+			socket.emit('message', {
+				text,
+				user_id: user.id,
+				room_id: currentRoom.id,
+			});
+		},
+		[socket, user, currentRoom]
+	);
 
-	const setUsername = (name) => {
-		if (!socket) return;
-		socket.emit('user', name);
-	};
+	const joinRoom = useCallback(
+		(room_id) => {
+			if (!socket || !user) return;
+			socket.emit('join_room', { user_id: user.id, room_id });
+		},
+		[socket, user]
+	);
 
-	const joinRoom = (name) => {
-		if (!socket) return;
-		socket.emit('join_room', name);
-	};
+	const addRoom = useCallback(
+		(room_name) => {
+			if (!socket) return;
+			socket.emit('create_room', room_name);
+		},
+		[socket]
+	);
+
+	useEffect(() => {
+		if (!socket || !username.length || user?.name === username) return;
+		socket.emit('user', username);
+	}, [username]);
 
 	useEffect(() => {
 		const socket = io(url);
@@ -54,7 +68,6 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				reset();
 				setSocket(socket);
 				socket.emit('get_rooms');
-				socket.emit('get_users');
 				if (user && user.name) {
 					setUsername(user.name);
 				}
@@ -84,18 +97,17 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 			.on('user', (user) => {
 				console.log('user: ', user);
 				setUser(user);
-				if (currentRoom) return;
-				socket.emit('join_room', { user_id: user.id });
-			})
-			.on('updated_user', (user) => {
-				console.log('updated_user: ', user);
-				setUser(user);
 			})
 			.on('join_room', (room) => {
 				console.log('room: ', room);
 				setCurrentRoom(room);
 				socket.emit('get_messages', room.id);
 				socket.emit('get_users', room.id);
+			})
+			.on('leave_room', () => {
+				setCurrentRoom(null);
+				setMessages([]);
+				setUsers([]);
 			})
 			.on('error', (err) => {
 				console.error(err);
@@ -108,18 +120,21 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 			});
 		return () => socket.off();
 	}, [socket, error, messages, users]);
+
 	return (
 		<SocketContext.Provider
 			value={{
 				socket,
 				error,
-				sendMessage,
-				setUsername,
 				user,
 				currentRoom,
 				rooms,
 				messages,
 				users,
+				sendMessage,
+				setUsername,
+				addRoom,
+				joinRoom,
 			}}
 		>
 			{children}
