@@ -1,0 +1,11 @@
+.container {
+	width: 100%;
+	height: 100%;
+	max-width: 40ch;
+	margin: 0 auto;
+	display: grid;
+	grid-template-rows: 5rem 1fr;
+	align-items: center;
+	justify-items: center;
+	gap: 1rem;
+}

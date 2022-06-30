@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import RestrictedAccess from '../components/RestrictedAccess';
-import ChatContainer from '../components/ChatContainer';
+import ChatContent from '../components/ChatContent';
 import SocketContext from '../context/SocketContext';
 import PageTitle from '../components/PageTitle';
 
@@ -9,8 +8,6 @@ const Chat = () => {
 	const { room_id } = useParams();
 	const { user, currentRoom, joinRoom } = useContext(SocketContext);
 	const navigate = useNavigate();
-
-	console.log('room_id: ', room_id);
 
 	useEffect(() => {
 		if (!user) {
@@ -22,20 +19,18 @@ const Chat = () => {
 		}
 		if (currentRoom?.id === room_id) return;
 		joinRoom(room_id);
-	}, [user, room_id]);
+	}, [user, room_id, currentRoom]);
 
 	return (
 		<>
-			{!user || !currentRoom ? (
-				''
-			) : (
+			{!user || !currentRoom ? null : (
 				<>
 					<PageTitle
 						title={`Chat${
 							currentRoom ? ` - ${currentRoom.name}` : ''
 						}`}
 					/>
-					<ChatContainer />
+					<ChatContent />
 				</>
 			)}
 		</>

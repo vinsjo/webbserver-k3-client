@@ -2,7 +2,7 @@ import React from 'react';
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { Start, RoomSelect, Chat, NotFound } from './routes';
+import { Start, RoomSelection, Chat, NotFound } from './routes';
 import Layout from './components/Layout';
 
 const App = () => {
@@ -12,7 +12,7 @@ const App = () => {
 				<Routes>
 					<Route element={<Layout />}>
 						<Route index element={<Start />} />
-						<Route path="chat" element={<RoomSelect />} />
+						<Route path="chat" element={<RoomSelection />} />
 						<Route path="chat/:room_id" element={<Chat />} />
 						<Route element={<NotFound />} />
 					</Route>

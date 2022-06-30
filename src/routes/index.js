@@ -1,6 +1,6 @@
 import Start from './Start';
-import RoomSelect from './RoomSelect';
+import RoomSelection from './RoomSelection';
 import Chat from './Chat';
 import NotFound from './NotFound';
 
-export { Start, RoomSelect, Chat, NotFound };
+export { Start, RoomSelection, Chat, NotFound };
