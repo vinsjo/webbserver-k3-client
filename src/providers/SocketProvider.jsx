@@ -64,7 +64,7 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 		if (!socket) return;
 		socket
 			.on('connect', () => {
-				console.log('Socket connected to server', `ID: ${socket.id}`);
+				console.log('Socket connected to server');
 				reset();
 				setSocket(socket);
 				socket.emit('get_rooms');
@@ -83,23 +83,18 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				setError(err);
 			})
 			.on('rooms', (rooms) => {
-				console.log('rooms: ', rooms);
 				setRooms(rooms);
 			})
 			.on('messages', (messages) => {
-				console.log('messages: ', messages);
 				setMessages(messages);
 			})
 			.on('users', (users) => {
-				console.log('users: ', users);
 				setUsers(users);
 			})
 			.on('user', (user) => {
-				console.log('user: ', user);
 				setUser(user);
 			})
 			.on('join_room', (room) => {
-				console.log('room: ', room);
 				setCurrentRoom(room);
 				socket.emit('get_messages', room.id);
 				socket.emit('get_users', room.id);
@@ -115,7 +110,6 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 			})
 			.on('message', (msg) => {
 				if (!msg || !msg.id) return;
-				console.log('Recieved message: ', msg);
 				setMessages([...messages, msg]);
 			});
 		return () => socket.off();
