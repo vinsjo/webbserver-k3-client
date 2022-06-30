@@ -29,6 +29,8 @@ const initialState = {
 	addRoom: (room_name) => {},
 	/** @param {String} room_id */
 	joinRoom: (room_id) => {},
+	/** @param {String} room_id */
+	deleteRoom: (room_id) => {},
 };
 
 /**

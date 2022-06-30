@@ -1,17 +1,24 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import SocketContext from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
 import styles from './JoinRoomForm.module.css';
 
 const JoinRoomForm = () => {
-	const { rooms } = useContext(SocketContext);
+	const { rooms, deleteRoom } = useContext(SocketContext);
 	const [selectedID, setSelectedID] = useState(null);
 	const navigate = useNavigate();
+
 	const handleSubmit = (ev) => {
 		ev.preventDefault();
 		if (!selectedID) return;
 		navigate(`/chat/${selectedID}`);
 	};
+
+	useEffect(() => {
+		if (!selectedID) return;
+		const selectedRoom = rooms.find((room) => room.id === selectedID);
+		if (!selectedRoom) setSelectedID(null);
+	}, [selectedID, rooms]);
 	return (
 		<form onSubmit={handleSubmit} className={styles.form}>
 			<ul className={styles['room-list']}>
@@ -23,9 +30,20 @@ const JoinRoomForm = () => {
 							className={`${styles.room}${
 								checked ? ` ${styles.selected}` : ''
 							}`}
-							onClick={() => setSelectedID(id)}
 						>
-							{name}
+							<code
+								className={styles['room-name']}
+								onClick={() => setSelectedID(id)}
+							>
+								{name}
+							</code>
+							<button
+								className={styles['delete-button']}
+								type="button"
+								onClick={() => deleteRoom(id)}
+							>
+								X
+							</button>
 						</li>
 					);
 				})}

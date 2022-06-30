@@ -6,7 +6,7 @@ import PageTitle from '../components/PageTitle';
 
 const Chat = () => {
 	const { room_id } = useParams();
-	const { user, currentRoom, joinRoom } = useContext(SocketContext);
+	const { user, currentRoom, rooms, joinRoom } = useContext(SocketContext);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -21,9 +21,15 @@ const Chat = () => {
 		joinRoom(room_id);
 	}, [user, room_id, currentRoom]);
 
+	useEffect(() => {
+		if (!currentRoom) return;
+		const index = rooms.findIndex((room) => room.id === currentRoom.id);
+		if (index < 0) navigate('/chat');
+	}, [rooms, currentRoom]);
+
 	return (
 		<>
-			{!user || !currentRoom ? null : (
+			{!user ? null : (
 				<>
 					<PageTitle
 						title={`Chat${

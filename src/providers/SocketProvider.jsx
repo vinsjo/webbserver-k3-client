@@ -48,6 +48,14 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 		[socket]
 	);
 
+	const deleteRoom = useCallback(
+		(room_id) => {
+			if (!socket) return;
+			socket.emit('delete_room', room_id);
+		},
+		[socket]
+	);
+
 	useEffect(() => {
 		if (!socket || !username.length || user?.name === username) return;
 		socket.emit('user', username);
@@ -71,6 +79,7 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				if (user && user.name) {
 					setUsername(user.name);
 				}
+				setError(null);
 			})
 			.on('disconnect', () => {
 				console.log('Socket disconnected from server');
@@ -84,25 +93,38 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 			})
 			.on('rooms', (rooms) => {
 				setRooms(rooms);
+
+				if (!currentRoom) return;
+
+				const roomIndex = rooms.findIndex(
+					(room) => room.id === currentRoom.id
+				);
+				if (roomIndex < 0) setCurrentRoom(null);
+				setError(null);
 			})
 			.on('messages', (messages) => {
 				setMessages(messages);
+				setError(null);
 			})
 			.on('users', (users) => {
 				setUsers(users);
+				setError(null);
 			})
 			.on('user', (user) => {
 				setUser(user);
+				setError(null);
 			})
 			.on('join_room', (room) => {
 				setCurrentRoom(room);
 				socket.emit('get_messages', room.id);
 				socket.emit('get_users', room.id);
+				setError(null);
 			})
 			.on('leave_room', () => {
 				setCurrentRoom(null);
 				setMessages([]);
 				setUsers([]);
+				setError(null);
 			})
 			.on('error', (err) => {
 				console.error(err);
@@ -111,6 +133,7 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 			.on('message', (msg) => {
 				if (!msg || !msg.id) return;
 				setMessages([...messages, msg]);
+				setError(null);
 			});
 		return () => socket.off();
 	}, [socket, error, messages, users]);
@@ -129,6 +152,7 @@ const SocketProvider = ({ children, url = 'http://localhost:4000' }) => {
 				setUsername,
 				addRoom,
 				joinRoom,
+				deleteRoom,
 			}}
 		>
 			{children}
